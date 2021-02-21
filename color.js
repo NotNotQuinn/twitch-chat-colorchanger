@@ -24,6 +24,7 @@ function randInt(max) {
 client.on("ready", () => {
     console.log(`${new Date().toLocaleTimeString()} | INFO - Connected to chat and ready to send colors.`)
     client_ready = true;
+    showInfo()
 })  
 
 function randomHex() {
@@ -49,28 +50,32 @@ function primeColor() {
     return out;
 }
 
+function showInfo() {
+    let primeMessage = "Prime colors are off, if you would like to have more colors, turn it on. (Requires Prime/Turbo)"
+    if(config.hasPrime) {
+        primeMessage = "Prime colors are on. If its not doing anything, try turning them off."
+    }
+    console.log(`${new Date().toLocaleTimeString()} | INFO - All commands are only sent to YOUR chat (#${config.username})`)
+    console.log(`${new Date().toLocaleTimeString()} | INFO - ${primeMessage}`)
+}
 
 setInterval(() => {
     let color = "";
-    if(hasPrime) {
+    if(config.hasPrime) {
         color = randomHex()
     } else {
         color = primeColor()
     }
     if (client_ready) {
         console.log(`${new Date().toLocaleTimeString()} | ${color}`)
-        client.privmsg(username, `/color ${color}`);
+        client.privmsg(config.username, `/color ${color}`);
     }
-}, seconds * 1000)
+}, config.seconds * 1000)
 
 
-setInterval(() => {
-    let primeMessage = "Prime colors are off."
-    if(hasPrime) {
-        primeMessage = "Prime colors are on."
-    }
-    console.log(`${new Date().toLocaleTimeString()} | INFO - All messages are only sent to YOUR chat (#${username})`)
-    console.log(`${new Date().toLocaleTimeString()} | INFO - ${primeMessage}`)
-}, seconds * 10 * 1000)  // every 10 color changes, should always be on the screen
+setInterval(showInfo, config.seconds * 10 * 1000)  // every 10 color changes, so it should always be on the screen
 
+console.log(`${new Date().toLocaleTimeString()} | THANKS - Thanks for using my colorchanger, inspired by turtoise's version.`)
+console.log(`${new Date().toLocaleTimeString()} | CREDIT - This color changing script was made by QuinnDT and can be found at twitch.tv/quinndt in chat.`)
+console.log(`${new Date().toLocaleTimeString()} | INFO - Connecting...`)
 client.connect()
