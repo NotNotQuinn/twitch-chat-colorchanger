@@ -6,7 +6,7 @@
 
 module.exports = {
     // change to true to have ANY color (needs twitch prime or turbo)
-    hasPrime: true,
+    hasPrime: false,
     // this is your username, it must be in lowercase
     username: "example_user",
     // this is an oauth token to login to chat, you can get one here: https://twitchapps.com/tmi/ (you dont need the "oauth:" part)
