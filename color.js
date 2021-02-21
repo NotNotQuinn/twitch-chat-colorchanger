@@ -1,12 +1,3 @@
-/* 
-    Hello to run this script you need nodejs & npm installed.
-    You also need to install dank-twitch-irc with the command 
-    `npm i dank-twitch-irc` before you run this :)
-
-    You can edit the things below here to suit your needs.
-*/
-
-
 const config = require("./config");
 
 // script
