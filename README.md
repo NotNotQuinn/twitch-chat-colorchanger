@@ -1,5 +1,5 @@
 # twitch-chat-colorchanger
-Changes your chat color on twitch.tv to random colors, every so often.
+Changes your chat color on twitch.tv to random colors, every so often, or optionally in a rainbow!
 
 ## Installation
 1. Make sure you have NodeJS installed, you can install it here: https://nodejs.org
