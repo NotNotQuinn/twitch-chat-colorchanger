@@ -1,4 +1,13 @@
-const config = require("./config");
+const fs = require("fs").promises;
+
+let getConfig = () =>  {
+    let conf = require("./config")
+    conf.channelsToCheckForMessagesSent = JSON.stringify(await fs.readFile("./color-channels.json"))
+    return conf;
+}
+
+
+let config = getConfig();
 const ircLib = require("dank-twitch-irc");
 const Color = require('color');
 var rainbowColor = Color('hsl(0, 60%, 50%)');
@@ -23,6 +32,21 @@ client.on("ready", () => {
     console.log(`${new Date().toLocaleTimeString()} | INFO - Connected to chat and ready to send colors.`)
     client_ready = true;
     showInfo()
+})
+
+client.on("PRIVMSG", async (msg) => {
+    let args = msg.messageText.split(" ");
+    if (msg.senderUsername === config.username){
+        if (args[0] !== "!color") {
+            return;
+        };
+        if (args[1] === "reload" && args[2] === "config") {
+            config = require("./config");
+
+            console.log(`${new Date().toLocaleTimeString()} | INFO - Config reloaded.`)
+            await client.say(config.username, `[COLOR-CHANGER] Config reloaded.`)
+        }
+    }
 })
 
 function randomHex() {
@@ -81,13 +105,13 @@ function updateColor() {
         if ( config.useRainbow ) {
             color = rainbowHex();
         } else {
-            color = randomHex()
+            color = randomHex();
         }
     } else {
-        color = nonPrimeColor()
+        color = nonPrimeColor();
     }
     if (client_ready) {
-        console.log(`${new Date().toLocaleTimeString()} | ${color}`)
+        console.log(`${new Date().toLocaleTimeString()} | ${color}`);
         client.privmsg(config.username, `/color ${color}`);
     }
 }
@@ -98,11 +122,11 @@ if (!config.onlyChangeColorOnMessageSent) {
 }
 
 
-
-console.log(`${new Date().toLocaleTimeString()} | THANKS - Thanks for using my colorchanger, inspired by turtoise's version.`)
-console.log(`${new Date().toLocaleTimeString()} | CREDIT - This color changing script was made by QuinnDT and can be found at twitch.tv/quinndt in chat.`)
-console.log(`${new Date().toLocaleTimeString()} | INFO - Connecting...`)
-client.connect()
+console.log(`${new Date().toLocaleTimeString()} | THANKS - Thanks for using my colorchanger, inspired by turtoise's version.`);
+console.log(`${new Date().toLocaleTimeString()} | CREDIT - This color changing script was made by QuinnDT and can be found at twitch.tv/quinndt in chat.`);
+console.log(`${new Date().toLocaleTimeString()} | INFO - Connecting...`);
+client.connect();
+client.join(config.username);
 if (config.onlyChangeColorOnMessageSent) {
 
     const anonClient = new ircLib.ChatClient();
