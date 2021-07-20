@@ -84,7 +84,7 @@ function showInfo() {
     if(config.useRainbow) {
         let rainbowMessage = `Rainbow is on. Speed: ${config.rainbowSpeed}`;
         if (!config.usePrimeColors) {
-            rainbowMessage = "Rainbow is on, but prime colors are off. Using random defalt color."
+            rainbowMessage = "Rainbow is on, but prime colors are off. Using random default color."
         }
         console.log(`${new Date().toLocaleTimeString()} | INFO - ${rainbowMessage}`)
     }
