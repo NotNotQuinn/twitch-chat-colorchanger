@@ -1,0 +1,6 @@
+# Write your channel names here
+# Lines starting with a '#' are ignored, as well as blank lines.
+# The script will also add any channels here, 
+# when you use the 'addColor' command.
+
+# The script will always join your channel.

@@ -1,15 +1,7 @@
-const fs = require("fs").promises;
-
-let getConfig = () =>  {
-    let conf = require("./config")
-    conf.channelsToCheckForMessagesSent = JSON.stringify(await fs.readFile("./color-channels.json"))
-    return conf;
-}
-
-
-let config = getConfig();
+const config = require("./config");
 const ircLib = require("dank-twitch-irc");
 const Color = require('color');
+const fs = require("fs");
 var rainbowColor = Color('hsl(0, 60%, 50%)');
 rainbowColor = rainbowColor.rotate(config.rainbowStartHue);
 const bot_config = {
@@ -19,34 +11,40 @@ const bot_config = {
 let client_ready = false;
 const client = new ircLib.ChatClient(bot_config);
 let colors_sent = 0;
-
-
-
+function getChannels() {
+    return fs.readFileSync("channels.txt").toString().split(/\r?\n/i).map(i => i.toLowerCase()).filter(Boolean).filter(i => !i.startsWith("#")).concat(config.username)
+}
+/**
+ * Writes to the channels file attempting to keep newlines and comments.
+ * @param {Array<string>} arr
+ */
+function setChannels(arr) {
+    let lines = fs.readFileSync("channels.txt").toString().split(/\r?\n/i).filter(i => {
+        if (i.startsWith("#")) return true;
+        if (i === "") return true;
+        return false;
+    })
+    // Always 1 empty line at the end.
+    if (lines[lines.length-1] != "") lines.push("")
+    lines = lines.concat(arr)
+    fs.writeFileSync("channels.txt", lines.filter(i => i !== config.username).join('\r\n'))
+}
+var channels = getChannels()
+console.log(channels)
 // Generates a random number from 0-limit (number will never = limit, e.g. `randInt(1)` always gives 0) 
 function randInt(limit) {
     return Math.floor(Math.random() * Math.floor(limit));
 }
+
+// 2021-07-20: QuinnDT: This is a mess.........
+// This whole code is so bad.
+// But it works eShrug
 
 client.on("ready", () => {
     // when the client is ready, say that we've connected, tell the program its connected, and send information about configiration.
     console.log(`${new Date().toLocaleTimeString()} | INFO - Connected to chat and ready to send colors.`)
     client_ready = true;
     showInfo()
-})
-
-client.on("PRIVMSG", async (msg) => {
-    let args = msg.messageText.split(" ");
-    if (msg.senderUsername === config.username){
-        if (args[0] !== "!color") {
-            return;
-        };
-        if (args[1] === "reload" && args[2] === "config") {
-            config = require("./config");
-
-            console.log(`${new Date().toLocaleTimeString()} | INFO - Config reloaded.`)
-            await client.say(config.username, `[COLOR-CHANGER] Config reloaded.`)
-        }
-    }
 })
 
 function randomHex() {
@@ -105,13 +103,13 @@ function updateColor() {
         if ( config.useRainbow ) {
             color = rainbowHex();
         } else {
-            color = randomHex();
+            color = randomHex()
         }
     } else {
-        color = nonPrimeColor();
+        color = nonPrimeColor()
     }
     if (client_ready) {
-        console.log(`${new Date().toLocaleTimeString()} | ${color}`);
+        console.log(`${new Date().toLocaleTimeString()} | ${color}`)
         client.privmsg(config.username, `/color ${color}`);
     }
 }
@@ -121,20 +119,45 @@ if (!config.onlyChangeColorOnMessageSent) {
     setInterval(updateColor, config.seconds * 1000);
 }
 
+var color = true;
 
-console.log(`${new Date().toLocaleTimeString()} | THANKS - Thanks for using my colorchanger, inspired by turtoise's version.`);
-console.log(`${new Date().toLocaleTimeString()} | CREDIT - This color changing script was made by QuinnDT and can be found at twitch.tv/quinndt in chat.`);
-console.log(`${new Date().toLocaleTimeString()} | INFO - Connecting...`);
-client.connect();
-client.join(config.username);
+console.log(`${new Date().toLocaleTimeString()} | THANKS - Thanks for using my colorchanger, inspired by turtoise's version.`)
+console.log(`${new Date().toLocaleTimeString()} | CREDIT - This color changing script was made by QuinnDT and can be found at twitch.tv/quinndt in chat.`)
+console.log(`${new Date().toLocaleTimeString()} | INFO - Connecting...`)
+client.connect()
 if (config.onlyChangeColorOnMessageSent) {
 
     const anonClient = new ircLib.ChatClient();
 
     anonClient.on("PRIVMSG", (msg) => {
+        
         // whenever the anon client sees a message, it just checks if the sender is you,
         // then it will update the color if it is.
-        if (msg.senderUsername == config.username) {
+        if(msg.messageText == "toggleColor" && msg.senderUsername == config.username){
+            if(color){
+                color = false;
+                client.privmsg(config.username, `Color is now off Kappa`)
+                console.log("Color is now off")
+            }else{
+                color = true;
+                client.privmsg(config.username, `Color is now on KappaPride`)
+                console.log("Color is now on")
+            }
+            
+        }
+        
+        if(msg.messageText.startsWith("addColor") && msg.senderUsername == config.username.toLowerCase()){
+            var channel = msg.messageText.split(" ")[1].toLowerCase()
+            if(channels.indexOf(channel) == -1){
+                anonClient.join(channel);
+                channels.push(channel)
+                setChannels(channels)
+                client.privmsg(config.username, "channel added")
+            }else{
+                client.privmsg(config.username, "Channel already on the list")
+            }
+        };
+        if (msg.senderUsername == config.username && color == true) {
             console.log(`${new Date().toLocaleTimeString()} | INFO - [${msg.channelName}] ${msg.senderUsername}: ${msg.messageText}`)
             updateColor()
             
@@ -152,5 +175,5 @@ if (config.onlyChangeColorOnMessageSent) {
     // only join if were going to use them. 
     // because the anon client will just check every message if its you.
     anonClient.connect()
-    anonClient.joinAll(config.channelsToCheckForMessagesSent);
+    anonClient.joinAll(channels);
 }

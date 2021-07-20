@@ -46,25 +46,17 @@ Changes your chat color on twitch.tv to random colors, every so often, or option
   - This must be a `bool` (`true` or `false`)
 
 Also to note: 
-- `color-channels.json`
-  - This file is a list of channels to connect to anonymously in JSON format, to look for messages sent by you, so the color will change when you send a message
-  - Your color will only change if you send a message in one of these channels.
-    ALL channels in this list must be in lower case.
-    This file must have an `Array` of `string`s, written like so:
-    ```json
-    [
-      "my_username", 
-      "annother_username", 
-      "and_annother_username"
-    ]
-    ```
+- `channels.txt`
+  - every line in this file will be a channel that the script joins (if you have it set up that way.) Lines starting with a '#' are ignored, and so are empty lines.
 
 ## Use
 
 ### Chat commands
 
-This script has a few (1) chat commands right now, they are as follows:
+This script has a few chat commands. They will only respond in your channel to avoid "adding bots" to peoples chats that they dont want. Only you can use these commands. The commands:
 
-- `"color reload config"`
-  - This reloads the config, so you dont have to restart it when you change something, for example if you added a channel to the list of channels to look for messages from you.
-
+- `"toggleColor"`
+  - Turn color on/off
+- `"addColor"`
+  - adds the channel to the channels that change color
+    for example: "`addColor justin`" will add `justin` to the channels text file and join it.
