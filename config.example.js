@@ -40,14 +40,6 @@ module.exports = {
     // If this is true it will only change your color when you send a message
     // it only checks in the channels you have added though, so dont expect it to work site wide.
     // this is not something we can improve.
-    onlyChangeColorOnMessageSent: false,
-
-    // this is a list of channels to check for messages sent from you, to update your color.
-    // for example you could put this:
-    //                              ["my_username", "annother_username", "and_annother_username"]
-    // your color will only change whenever you send a message in one of these channels.
-    // If you plan on spamming, you will only be able to spam 10 messages per 30 seconds
-    // THESE MUST ALSO BE IN LOWERCASE
-    channelsToCheckForMessagesSent: []
+    onlyChangeColorOnMessageSent: false
 
 }
