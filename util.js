@@ -47,7 +47,7 @@ const getChannels = (config) => {
  * Writes to the channels file attempting to keep newlines and comments.
  * @param {Array<string>} arr
  */
-const setChannels = (arr) => {
+const setChannels = (arr, config) => {
     let lines = fs.readFileSync("channels.txt").toString().split(/\r?\n/i).filter(i => {
         if (i.startsWith("#")) return true;
         if (i === "") return true;
@@ -90,11 +90,13 @@ const randInt = (limit) => {
 
 /**
  * Gets the anon client
+ * @param {DankTwitch.ChatClient} client The non-anon client.
  * @param {any} config The config.
+ * @param {Array<string>} channels The list of channels.
  * @param {() => void} UpdateColorMethod A function that when called will update the color.
  * @returns {DankTwitch.ChatClient} The anon client.
  */
-const getAnonClient = (config, UpdateColorMethod) => {
+const getAnonClient = (client, config, channels, UpdateColorMethod) => {
     let useColor = true;
 
     const anonClient = new DankTwitch.ChatClient();
@@ -121,7 +123,7 @@ const getAnonClient = (config, UpdateColorMethod) => {
             if (channels.indexOf(channel) == -1) {
                 anonClient.join(channel);
                 channels.push(channel)
-                setChannels(channels)
+                setChannels(channels, config)
                 client.privmsg(config.username, "channel added")
             } else {
                 client.privmsg(config.username, "Channel already on the list")

@@ -86,7 +86,7 @@ util.log('INFO', `Connecting...`)
 client.connect()
 if (config.onlyChangeColorOnMessageSent) {
 
-    let anonClient = util.getAnonClient(config, updateColor)
+    let anonClient = util.getAnonClient(client, config, channels, updateColor)
 
     // only join if were going to use them. 
     // because the anon client will just check every message if its you.
