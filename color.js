@@ -1,19 +1,23 @@
+// Imports
 const config = require("./config");
-const ircLib = require("dank-twitch-irc");
+const DankTwitch = require("dank-twitch-irc");
 const Color = require('color');
 const fs = require("fs");
-var rainbowColor = Color('hsl(0, 60%, 50%)');
-rainbowColor = rainbowColor.rotate(config.rainbowStartHue);
-const bot_config = {
-    username: config.username, // justinfan12345 by default - For anonymous chat connection
-    password: config.oauth, // undefined by default (no password)
-}
-let client_ready = false;
-const client = new ircLib.ChatClient(bot_config);
-let colors_sent = 0;
+
+/**
+ * Get channels from the file.
+ * @returns {Array<string>} channels
+ */
 function getChannels() {
-    return fs.readFileSync("channels.txt").toString().split(/\r?\n/i).map(i => i.toLowerCase()).filter(Boolean).filter(i => !i.startsWith("#")).concat(config.username)
+    return fs.readFileSync("channels.txt")
+        .toString()
+        .split(/\r?\n/i)
+        .map(i => i.toLowerCase())
+        .filter(Boolean)
+        .filter(i => !i.startsWith("#"))
+        .concat(config.username)
 }
+
 /**
  * Writes to the channels file attempting to keep newlines and comments.
  * @param {Array<string>} arr
@@ -24,17 +28,29 @@ function setChannels(arr) {
         if (i === "") return true;
         return false;
     })
+
     // Always 1 empty line at the end.
     if (lines[lines.length-1] != "") lines.push("")
     lines = lines.concat(arr)
     fs.writeFileSync("channels.txt", lines.filter(i => i !== config.username).join('\r\n'))
 }
-var channels = getChannels()
+let channels = getChannels()
 console.log(channels)
 // Generates a random number from 0-limit (number will never = limit, e.g. `randInt(1)` always gives 0) 
 function randInt(limit) {
     return Math.floor(Math.random() * Math.floor(limit));
 }
+
+// Initilization
+const bot_config = {
+    username: config.username, // justinfan12345 by default - For anonymous chat connection
+    password: config.oauth, // undefined by default (no password)
+}
+let rainbowColor = Color('hsl(0, 60%, 50%)');
+rainbowColor = rainbowColor.rotate(config.rainbowStartHue);
+let client_ready = false;
+const client = new DankTwitch.ChatClient(bot_config);
+let colors_sent = 0;
 
 // 2021-07-20: QuinnDT: This is a mess.........
 // This whole code is so bad.
@@ -119,7 +135,7 @@ if (!config.onlyChangeColorOnMessageSent) {
     setInterval(updateColor, config.seconds * 1000);
 }
 
-var color = true;
+let color = true;
 
 console.log(`${new Date().toLocaleTimeString()} | THANKS - Thanks for using my colorchanger, inspired by turtoise's version.`)
 console.log(`${new Date().toLocaleTimeString()} | CREDIT - This color changing script was made by QuinnDT and can be found at twitch.tv/quinndt in chat.`)
@@ -127,7 +143,7 @@ console.log(`${new Date().toLocaleTimeString()} | INFO - Connecting...`)
 client.connect()
 if (config.onlyChangeColorOnMessageSent) {
 
-    const anonClient = new ircLib.ChatClient();
+    const anonClient = new DankTwitch.ChatClient();
 
     anonClient.on("PRIVMSG", (msg) => {
         
@@ -147,7 +163,7 @@ if (config.onlyChangeColorOnMessageSent) {
         }
         
         if(msg.messageText.startsWith("addColor") && msg.senderUsername == config.username.toLowerCase()){
-            var channel = msg.messageText.split(" ")[1].toLowerCase()
+            let channel = msg.messageText.split(" ")[1].toLowerCase()
             if(channels.indexOf(channel) == -1){
                 anonClient.join(channel);
                 channels.push(channel)
