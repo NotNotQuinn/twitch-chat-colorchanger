@@ -12,8 +12,9 @@ rainbowColor = rainbowColor.rotate(config.rainbowStartHue);
 const client = util.getClient({
     username: config.username,
     password: config.oauth
-}, util.showInfo);
+}, () => util.showInfo(config));
 let colors_sent = 0;
+const nextTransitionalColor = util.getTransitionColorGetter(config)
 
 // 2021-07-20: QuinnDT: This is a mess.........
 // This whole code is so bad.
@@ -61,7 +62,10 @@ function updateColor() {
     let color = "";
     if(config.usePrimeColors) {
         if ( config.useRainbow ) {
-            color = rainbowHex();
+            if ((config.colorList?.length ?? 0) > 0) {
+                color = nextTransitionalColor();
+                if (!color) throw new Error(`got invalid value as a color: ${color}`)
+            } else color = rainbowHex();
         } else {
             color = randomHex()
         }
