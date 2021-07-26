@@ -17,14 +17,14 @@ const log = (level, thing) => {
 /**
  * Gets twitch client.
  * @param {object} config Config to pass to client.
- * @param {(config: object) => void} ShowSomeInfo Function to show info. (??)
+ * @param {() => void} ShowSomeInfo Function to show info. (??)
  */
 const getClient = (config, ShowSomeInfo) => {
     let client = new DankTwitch.ChatClient(config)
 
     client.on("ready", () => {
         log("info", "Connected to chat.")
-        ShowSomeInfo(config)
+        ShowSomeInfo()
     })
     return client
 }
@@ -150,7 +150,7 @@ const getAnonClient = (client, config, channels, UpdateColorMethod) => {
 /**
  * Get a transition function that will return a new transition between colors using HSL.
  *
- * The transition will not include the starting color, but will include the ending color.
+ * The transition will not include the ending color, but will include the starting color.
  * @param {string} startColor The starting color
  * @param {string} endColor The finishing color
  * @returns {() => string|null} Transition function.
@@ -167,9 +167,13 @@ const getTransitioner = (startColor, endColor) => {
 
     // This ensures that the speed will move the one that has the largest distance
     // one point at a time, and the others less than that.
-    let numSteps = Math.ceil(Math.max(Math.abs(Hdistance), Math.abs(Sdistance), Math.abs(Ldistance)));
+    let numSteps = Math.ceil(Math.max(
+        Math.abs(Hdistance),
+        Math.abs(Sdistance),
+        Math.abs(Ldistance)
+    ));
 
-    // The speed for the largest distance will be 1
+    // The speed for the largest distance will be close to but smaller than 1
     // The others will be smaller than 1
     let Hspeed = Hdistance/numSteps
     let Sspeed = Sdistance/numSteps
@@ -182,25 +186,69 @@ const getTransitioner = (startColor, endColor) => {
             return null
         }
 
+        let hex = current.hex()
+
         current = Color([
             current.hue() + Hspeed,
             current.saturationl() + Sspeed,
             current.lightness() + Lspeed
         ], 'hsl')
 
-        return current.hex()
+        return hex
+    }
+}
+
+
+/**
+ * Gets a function that will transition the colours 
+ * @param {object} config The config.
+ * @returns {() => string|null} The transition color getter.
+ */
+const getTransitionColorGetter = (config) => {
+    // If there is 0 or 1 colors, always return the only color or null
+    if (Array.isArray(config.colorList) && config.colorList.length < 2) {
+        const item =
+            config.colorList[0]
+                ? Color(config.colorList[0]).hex()
+                : null
+        return () => item
+    }
+
+    /** @type {Array<string>} */
+    let colors = config.colorList;
+    /** The index we are transitioning to. */
+    let target = 1;
+    /** The index we are transitioning from. */
+    let last = 0;
+    /** @type {() => string|null} */
+    let nextColor = getTransitioner(colors[0], colors[1]);
+    return () => {
+        let color = nextColor()
+        if (!color) {
+            // We have just reached the target, increament or loop over.
+            last = target;
+            if (++target >= colors.length) {
+                target = 0;
+            };
+            // Get the next transition and return the first item in it.
+            nextColor = getTransitioner(colors[last], colors[target]);
+
+            color = nextColor()
+        }
+        return color;
     }
 }
 
 
 // Exporting
 module.exports = {
-    log,
-    getClient,
+    getAnonClient,
     getChannels,
+    getClient,
+    getTransitionColorGetter,
+    getTransitioner,
+    log,
     setChannels,
     showInfo,
     randInt,
-    getAnonClient,
-    getTransitioner,
 }
