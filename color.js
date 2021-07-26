@@ -3,7 +3,6 @@
 const config = require("./config");
 const util = require("./util")
 const Color = require('color');
-const DankTwitch = require("dank-twitch-irc")
 
 let channels = util.getChannels(config)
 
@@ -20,6 +19,8 @@ let colors_sent = 0;
 // This whole code is so bad.
 // But it works eShrug
 
+// 2021-07-24: QuinnDT: Much better, but still sorta a mess.
+// Glad I made './util.js' tho, made it a lot easier.
 
 function randomHex() {
     let out = "#";
@@ -81,7 +82,6 @@ if (!config.onlyChangeColorOnMessageSent) {
 }
 
 util.log('THANKS', `Thanks for using my colorchanger, inspired by turtoise's version.`)
-util.log('CREDIT', `This color changing script was made by QuinnDT and can be found at twitch.tv/quinndt in chat.`)
 util.log('INFO', `Connecting...`)
 client.connect()
 if (config.onlyChangeColorOnMessageSent) {
