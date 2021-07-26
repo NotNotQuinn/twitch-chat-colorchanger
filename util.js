@@ -155,7 +155,7 @@ const getAnonClient = (client, config, channels, UpdateColorMethod) => {
  * @param {string} endColor The finishing color
  * @returns {() => string|null} Transition function.
  */
-const getTransitioner = (startColor, endColor) => {
+const getTransitioner = (startColor, endColor, speedMultiplier) => {
     let start = Color(startColor).hsl();
     let current = Color(startColor).hsl();
     let end = Color(endColor).hsl();
@@ -189,10 +189,37 @@ const getTransitioner = (startColor, endColor) => {
         let hex = current.hex()
 
         current = Color([
-            current.hue() + Hspeed,
-            current.saturationl() + Sspeed,
-            current.lightness() + Lspeed
+            current.hue() + Hspeed * speedMultiplier,
+            current.saturationl() + Sspeed * speedMultiplier,
+            current.lightness() + Lspeed * speedMultiplier
         ], 'hsl')
+
+        // check here to see if we have essentially 'skipped over' the target color.
+        // If we have, we are finished.
+        if ((() => {
+            if (Hspeed <= 0 ) {
+                // Hue speed is negative, going downwards.
+                if (current.hue() < end.hue()) return true;
+            } else {
+                if (current.hue() > end.hue()) return true;
+            }
+            if (Sspeed <= 0 ) {
+                // Saturation speed is negative, going downwards.
+                if (current.saturationl() < end.saturationl()) return true;
+            } else {
+                if (current.saturationl() > end.saturationl()) return true;
+            }
+            if (Lspeed <= 0 ) {
+                // Saturation speed is negative, going downwards.
+                if (current.lightness() < end.lightness()) return true;
+            } else {
+                if (current.lightness() > end.lightness()) return true;
+            }
+            return false
+        })()) {
+            console.log("Color overshot!")
+            done = true
+        }
 
         return hex
     }
@@ -221,7 +248,7 @@ const getTransitionColorGetter = (config) => {
     /** The index we are transitioning from. */
     let last = 0;
     /** @type {() => string|null} */
-    let nextColor = getTransitioner(colors[0], colors[1]);
+    let nextColor = getTransitioner(colors[0], colors[1], config.rainbowSpeed);
     return () => {
         let color = nextColor()
         if (!color) {
@@ -231,7 +258,7 @@ const getTransitionColorGetter = (config) => {
                 target = 0;
             };
             // Get the next transition and return the first item in it.
-            nextColor = getTransitioner(colors[last], colors[target]);
+            nextColor = getTransitioner(colors[last], colors[target], config.rainbowSpeed);
 
             color = nextColor()
         }
