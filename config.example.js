@@ -40,6 +40,15 @@ module.exports = {
     // If this is true it will only change your color when you send a message
     // it only checks in the channels you have added though, so dont expect it to work site wide.
     // this is not something we can improve.
-    onlyChangeColorOnMessageSent: false
+    onlyChangeColorOnMessageSent: false,
 
+
+    // Transitions between each color by converting each to HSL (hue, saturation, lightness)
+    // And finding the target color's HSL, then slowly transitioning all 3.
+    // (active when not empty and using rainbow)
+    colorList: [
+        // "#B1FCDF",
+        // "#8C7F7F",
+        // "#FFFF00",
+    ]
 }
