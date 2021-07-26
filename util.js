@@ -1,4 +1,5 @@
 // Imports
+const Color = require("color");
 const DankTwitch = require("dank-twitch-irc");
 const fs = require("fs");
 
@@ -16,7 +17,7 @@ const log = (level, thing) => {
 /**
  * Gets twitch client.
  * @param {object} config Config to pass to client.
- * @param {(config: any) => void} ShowSomeInfo Function to show info. (??)
+ * @param {(config: object) => void} ShowSomeInfo Function to show info. (??)
  */
 const getClient = (config, ShowSomeInfo) => {
     let client = new DankTwitch.ChatClient(config)
@@ -146,6 +147,50 @@ const getAnonClient = (client, config, channels, UpdateColorMethod) => {
     return anonClient
 }
 
+/**
+ * Get a transition function that will return a new transition between colors using HSL.
+ *
+ * The transition will not include the starting color, but will include the ending color.
+ * @param {string} startColor The starting color
+ * @param {string} endColor The finishing color
+ * @returns {() => string|null} Transition function.
+ */
+const getTransitioner = (startColor, endColor) => {
+    let start = Color(startColor).hsl();
+    let current = Color(startColor).hsl();
+    let end = Color(endColor).hsl();
+
+    // Figure out how far we need to go for each.
+    let Hdistance = end.hue() - start.hue()
+    let Sdistance = end.saturationl() - start.saturationl()
+    let Ldistance = end.lightness() - start.lightness()
+
+    // This ensures that the speed will move the one that has the largest distance
+    // one point at a time, and the others less than that.
+    let numSteps = Math.ceil(Math.max(Math.abs(Hdistance), Math.abs(Sdistance), Math.abs(Ldistance)));
+
+    // The speed for the largest distance will be 1
+    // The others will be smaller than 1
+    let Hspeed = Hdistance/numSteps
+    let Sspeed = Sdistance/numSteps
+    let Lspeed = Ldistance/numSteps
+
+    let done = false;
+    return () => {
+        if (done || current.hex() == end.hex()) {
+            done = true
+            return null
+        }
+
+        current = Color([
+            current.hue() + Hspeed,
+            current.saturationl() + Sspeed,
+            current.lightness() + Lspeed
+        ], 'hsl')
+
+        return current.hex()
+    }
+}
 
 
 // Exporting
@@ -157,4 +202,5 @@ module.exports = {
     showInfo,
     randInt,
     getAnonClient,
+    getTransitioner,
 }
