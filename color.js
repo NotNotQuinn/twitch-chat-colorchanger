@@ -29,7 +29,7 @@ function randomHex() {
 
     for(i = 0;i < 6;i++) {
         // chooses one random letter 6 times
-        out += hexLetters[randInt(hexLetters.length)]
+        out += hexLetters[util.randInt(hexLetters.length)]
     }
 
     return out;
@@ -47,7 +47,7 @@ function nonPrimeColor() {
     const primeColors = ["Blue", "BlueViolet", "CadetBlue", "Chocolate", "Coral", "DodgerBlue", "Firebrick", "GoldenRod", "Green", "HotPink", "OrangeRed", "Red", "SeaGreen", "SpringGreen", "YellowGreen"];
 
     // just pick one at random
-    out += primeColors[randInt(primeColors.length)];
+    out += primeColors[util.randInt(primeColors.length)];
 
     return out;
 }
