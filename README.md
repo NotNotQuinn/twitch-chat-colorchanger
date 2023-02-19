@@ -1,6 +1,6 @@
 # This script won't work after 24 Feb 2023, because *twitch*.
 
-I won't be updating it to the new API, see [issue #3](https://github.com/NotNotQuinn/twitch-chat-colorchanger/issues/3).
+I won't be updating it to the new API, see [my comment on issue #3](https://github.com/NotNotQuinn/twitch-chat-colorchanger/issues/3#issuecomment-1435914185).
 
 ---
 
